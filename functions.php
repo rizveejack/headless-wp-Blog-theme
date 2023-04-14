@@ -1,96 +1,112 @@
 <?php 
+ require_once "inc/tmg/tmg-active.php";
+ require_once "inc/block_perser.php";
+ require_once "inc/related_post_wpQuery.php";
+ require_once "inc/extend_query_limit.php";
 
-define("HEADLESS_URL","http://localhost:3000");
+ if ( ! function_exists( 'headless_blog_theme_setup' ) ) :
+	/**
+	 * Sets up theme defaults and registers support for various
+	 * WordPress features.
+	 *
+	 * Note that this function is hooked into the after_setup_theme
+	 * hook, which runs before the init hook. The init hook is too late
+	 * for some features, such as indicating support post thumbnails.
+	 */
+	function headless_blog_theme_setup() {
 
-add_action( 'woocommerce_load_cart_from_session', function () {
+		/**
+		 * Enable support for post thumbnails and featured images.
+		 */
+		add_theme_support( 'post-thumbnails' );
 
-	// Bail if there isn't any data
-	if ( ! isset( $_GET['session_id'] ) ) {
-		return;
+		/**
+		 * Add support for two custom navigation menus.
+		 */
+		register_nav_menus( array(
+			'primary'   => __( 'Primary Menu', 'headless_blog' ),
+			'secondary' => __( 'Footer Menu', 'headless_blog' ),
+			'mobile' => __( 'Mobile Menu', 'headless_blog' ),
+		) );
+
+		/**
+		 * Enable support for the following post formats:
+		 * aside, gallery, quote, image, and video
+		 */
+		add_theme_support( 'post-formats', array( 'aside', 'gallery', 'quote', 'image', 'video' ) );
 	}
-
-	$session_id = sanitize_text_field( $_GET['session_id'] );
-
-	try {
-
-		$handler      = new \WC_Session_Handler();
-		$session_data = $handler->get_session( $session_id );
-
-    // We were passed a session ID, yet no session was found. Let's log this and bail.
-		if ( empty( $session_data ) ) {
-			throw new \Exception( 'Could not locate WooCommerce session on checkout' );
-		}
-
-    // Go get the session instance (WC_Session) from the Main WC Class
-		$session = WC()->session;
-
-    // Set the session variable
-		foreach ( $session_data as $key => $value ) {
-			$session->set( $key, unserialize( $value ) );
-		}
-
-	} catch ( \Exception $exception ) {
-		ErrorHandling::capture( $exception );
-	}
-
-} );
-
-add_action( 'woocommerce_checkout_after_customer_details', function () {
-	// Bail if there isn't any data
-	if ( ! isset( $_GET['session_id'] ) ) {
-		return;
-	} ?>
-
-	<input
-		type="hidden"
-		name="headless-session"
-		value="<?= esc_attr( $_GET['session_id'] ) ?>"
-	/>
-	<?php
-} );
+endif; // myfirsttheme_setup
+add_action( 'after_setup_theme', 'headless_blog_theme_setup' );
 
 
-add_action( 'woocommerce_payment_complete', function () {
-	// Bail if there isn't any data
-	if ( ! isset( $_POST['headless-session'] ) ) {
-		return;
-	}
+add_action( 'admin_init', 'ads_register_setting' );
 
-	// Delete the headless session we set on POST during the checkout
-	WC()->session->delete_session( sanitize_text_field( $_POST['headless-session'] ) );
-} );
+add_action( 'admin_init', 'ads_register_setting' );
 
-add_filter( 'woocommerce_persistent_cart_enabled', '__return_false' );
+/**
+ * Tell WP we use a setting - and where.
+ */
+function ads_register_setting()
+{
+    add_settings_section(
+        'ads_id',
+        'Headless Website Settings',
+        'ads_description',
+        'general'
+    );
 
-add_action( 'woocommerce_checkout_update_order_meta', function ( $order_id ) {
-	// Bail if there isn't any data
-	if ( ! isset( $_POST['headless-session'] ) ) {
-		return;
-	}
-
-	update_post_meta( $order_id, 'headless-session', sanitize_text_field( $_POST['headless-session'] ) );
-} );
-
-add_action( 'woocommerce_thankyou_paypal', function ( $order_id ) {
-	$headless_session = get_post_meta( $order_id, 'headless-session', true );
-
-	if ( empty( $headless_session ) ) {
-		return;
-	}
-
-	// Delete the headless session we set on POST during the checkout
-	WC()->session->delete_session( sanitize_text_field( $headless_session ) );
-
-  // Tidy things up so our db doesn't get bloated
-  delete_post_meta( $order_id, 'headless-session' );
-} );
-
-
-add_action( 'template_redirect', 'woo_custom_redirect_after_purchase' );
-function woo_custom_redirect_after_purchase() {
-	global $wp;
-	if ( is_checkout() && !empty( $wp->query_vars['order-received'] ) ) {
-		wp_redirect( 'http://localhost:3000/thankyou?order_id='.$wp->query_vars['order-received'] );
-		exit;
-	}
+    // Register a callback
+    register_setting(
+        'general',
+        'feurl',
+        'trim'
+    );
+    // Register the field for the "End" section.
+    add_settings_field(
+        'feurl',
+        'Front-End URL',
+        'ads_show_settings',
+        'general',
+        'ads_id',
+        array ( 'label_for' => 'ads_id' )
+    );
 }
+
+/**
+ * Print the text before our field.
+ */
+function ads_description()
+{
+    
+}
+
+/**
+ * Show our field.
+ *
+ * @param array $args
+ */
+function ads_show_settings( $args )
+{
+    $data = esc_attr( get_option( 'feurl', '' ) );
+
+    printf(
+        '<input type="url" name="feurl" value="%1$s" id="%2$s"  placeholder="http://localhost:3000/"/>',
+        $data,
+        $args['label_for']
+    );
+}
+
+
+
+// Redirect website to frontend
+function redirect_website(){
+	
+$frontend_url = !empty(get_option( 'feurl')) ? get_option( 'feurl') : "http://localhost:3000/";
+    if ( $frontend_url ) {
+        wp_redirect( $frontend_url );
+        die();
+    }
+}
+
+
+add_action( 'template_redirect','redirect_website');
