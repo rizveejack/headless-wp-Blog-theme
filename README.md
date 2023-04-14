@@ -1,14 +1,9 @@
-<h1>Headless Wordpress WP Theme</h1>
+<h1>Headless Wordpress Blog Theme</h1>
 <p>
-    Use this theme for your decoupled wordpress website
+    Use this theme for your decoupled wordpress Blog website
 </p>
 
 <h2>
     Instraction for This Theme
 </h2>
 
-<ul>
-    <li>
-        Create a thankyou page for your front end
-    </li>
-</ul>
