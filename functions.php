@@ -4,7 +4,7 @@
  require_once "inc/related_post_wpQuery.php";
  require_once "inc/extend_query_limit.php";
  require_once "inc/view_link_changer.php";
- 
+ require_once "inc/block_filter.php";
 
  if ( ! function_exists( 'headless_blog_theme_setup' ) ) :
 	/**

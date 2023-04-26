@@ -54,14 +54,14 @@ function change_category_URL ($link) {
 }
 
 
-function change_site_URL ($url) {
+// function change_site_URL ($url) {
 	
-	$new_link = !empty(get_option( 'feurl' ))? str_replace(get_site_url(),rtrim(get_option( 'feurl' ), '/'),$url) : str_replace(get_site_url(),"http://localhost:3000",$url);
+// 	$new_link = !empty(get_option( 'feurl' ))? str_replace(get_site_url(),rtrim(get_option( 'feurl' ), '/'),$url) : str_replace(get_site_url(),"http://localhost:3000",$url);
 
-	return $new_link;
-}
+// 	return $new_link;
+// }
 
-add_filter( 'home_url', 'change_site_URL', 10, 1);
+// add_filter( 'home_url', 'change_site_URL', 10, 1);
 add_filter( 'post_link', 'change_post_URL', 10, 2);
 add_filter( 'page_link', 'change_page_URL', 10, 1);
 add_filter( 'category_link', 'change_category_URL', 10, 1);
