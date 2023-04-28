@@ -13,11 +13,8 @@ function misha_allowed_block_types( $allowed_blocks, $editor_context ) {
 		'core/list-item',
 		'core/table',
 		'core/buttons',
-		'core/media-text-block',
 		'core/quote',
 		'core/media-text',
-		'core/pullquote',
-		'core/gallery',
 		'yoast/faq-block',
 		'yoast/how-to-block'
 	);

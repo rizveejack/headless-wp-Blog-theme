@@ -76,7 +76,7 @@ function fix_preview_link_on_draft() {
 			const editorPreviewButton = jQuery(".edit-post-header-preview__button-external");
 
 			if (editorPreviewButton.length && editorPreviewButton.attr("href") !== "' . get_preview_post_link() . '" ) {
-				editorPreviewButton.attr("href", "' . get_preview_post_link() . '");
+				editorPreviewButton.attr("href", "' . get_preview_post_link() . '","_blank");
 				editorPreviewButton.off();
 				editorPreviewButton.click(false);
 				editorPreviewButton.on("click", function(e) {
